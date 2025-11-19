@@ -6,6 +6,6 @@ version '2.0.0'
 description "showcar"
 
 client_scripts {
-	"main.lua",
-	"config.lua"
+    'config.lua',
+    'main.lua'
 }

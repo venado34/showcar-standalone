@@ -35,7 +35,7 @@ Config.Showrooms = {
     },
 
     -- Add more show cars here...
---]]
+    --]]
 
     [1] = {
         model = `lcso22at4`,
@@ -57,5 +57,4 @@ Config.Showrooms = {
             [12] = true,
         }
     },
-
 }
