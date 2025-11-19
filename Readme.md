@@ -4,7 +4,7 @@ A simple script to permanently spawn and showcase custom vehicles anywhere on yo
 
 ---
 
-## ✨ Key Features
+## Key Features
 
 * **Permanent Display:** Vehicles are set as mission entities (`SetEntityAsMissionEntity`) and frozen to prevent despawn and movement.
 * **Customization Control:** Full configuration for Livery, Mods, and Colors.
