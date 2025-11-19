@@ -17,11 +17,14 @@ local function SetVehicleCustomization(vehicle, data)
         end
     end
 
-    -- APPLY EXTRAS
+    -- APPLY EXTRAS (INVERTED LOGIC)
     if data.extras and type(data.extras) == 'table' then
         for extra_id, is_active in pairs(data.extras) do
-            SetVehicleExtra(vehicle, extra_id, is_active and 1 or 0)
-            -- SetVehicleExtra(vehicle, extra_id, is_active and 0 or 1)  --uncomment this and comment out above if reversed
+            -- The normal logic (TRUE = 1, FALSE = 0) is commented out
+            -- SetVehicleExtra(vehicle, extra_id, is_active and 1 or 0)
+
+            -- Use the INVERTED logic (TRUE = 0, FALSE = 1)
+            SetVehicleExtra(vehicle, extra_id, is_active and 0 or 1)
         end
     end
 end
@@ -35,7 +38,7 @@ local function SpawnShowVehicle(car_data, index)
     while not HasModelLoaded(model) do
         Wait(100)
     end
-    
+
     -- DEBUG: Print message before spawning
     print('showcar-standalone DEBUG: Model loaded, attempting to spawn vehicle ' .. car_data.model)
 
@@ -46,15 +49,15 @@ local function SpawnShowVehicle(car_data, index)
     if car_data.plate and type(car_data.plate) == 'string' then
         SetVehicleNumberPlateText(vehicle, car_data.plate)
     end
-    
+
     -- === VEHICLE CLEANING ===
     SetVehicleDirtLevel(vehicle, 0.0) -- Ensure the car is spotless (0.0 dirt level)
-    
+
     -- === ANTI-DELETION & FREEZING LOGIC ===
     SetEntityAsMissionEntity(vehicle, true, true)
     SetVehicleUndriveable(vehicle, true)
     FreezeEntityPosition(vehicle, true)
-    
+
     -- === LIVERY AND EXTRAS LOGIC ===
     SetVehicleCustomization(vehicle, car_data)
 
@@ -64,7 +67,7 @@ local function SpawnShowVehicle(car_data, index)
 
     -- Save the handle
     showVehicles[index] = vehicle
-    
+
     -- DEBUG: Print message after spawning
     if DoesEntityExist(vehicle) then
         print('showcar-standalone DEBUG: Vehicle spawned successfully!')
@@ -124,10 +127,10 @@ CreateThread(function()
                 SetEntityAsMissionEntity(vehicle, true, true)
                 FreezeEntityPosition(vehicle, true)
                 -- Also ensure it stays clean if the vehicle is checked in the loop
-                SetVehicleDirtLevel(vehicle, 0.0) 
+                SetVehicleDirtLevel(vehicle, 0.0)
             end
         end
-        Wait(Config.CheckVehicleTick) 
+        Wait(Config.CheckVehicleTick)
     end
 end)
 
