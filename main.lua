@@ -44,7 +44,7 @@ local function SpawnShowVehicle(car_data, index)
     -- Spawn the vehicle
     local vehicle = CreateVehicle(model, coords.x, coords.y, coords.z, coords.w, false, true)
 
-    -- === NEW: CUSTOM PLATE LOGIC ===
+    -- === CUSTOM PLATE LOGIC ===
     if car_data.plate and type(car_data.plate) == 'string' then
         SetVehicleNumberPlateText(vehicle, car_data.plate)
     end

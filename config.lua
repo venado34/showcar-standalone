@@ -14,11 +14,12 @@ Config.Showrooms = {
         model = 'zentorno',
         coords = vector4(-123.45, 678.90, 31.0, 180.0), -- x, y, z, heading
         spin = true,
+        plate = 'Dealer',
 
-        -- NEW FEATURE: Vehicle Livery (Integer index: 0 is default)
+        -- Vehicle Livery (Integer index: 0 is default)
         livery = 1,
 
-        -- NEW FEATURE: Vehicle Extras (Key=Extra ID 1-12, Value = true/false)
+        -- Vehicle Extras (Key=Extra ID 1-12, Value = true/false)
         extras = {
             [1] = true,   -- Extra 1: ON
             [2] = false,  -- Extra 2: OFF
