@@ -11,7 +11,7 @@ Config.Showrooms = {
     --[[
     -- Example 1: Zentorno (Spins, Livery 1, Extras 1 and 5 ON)
     [1] = {
-        model = `zentorno`,
+        model = 'zentorno',
         coords = vector4(-123.45, 678.90, 31.0, 180.0), -- x, y, z, heading
         spin = true,
 
@@ -28,7 +28,7 @@ Config.Showrooms = {
 
     -- Example 2: Adder (No spin, Default Livery, All Extras OFF)
     [2] = {
-        model = `adder`,
+        model = 'adder',
         coords = vector4(100.0, 200.0, 30.0, 0.0),
         spin = false,
         -- You can omit 'livery' and 'extras' if you want defaults.
@@ -38,10 +38,10 @@ Config.Showrooms = {
     --]]
 
     [1] = {
-        model = `lcso22at4`,
-        coords = vector4(1853.7705, 3674.0310, 33.8292, 29.6533), -- x, y, z, heading
+        model = 'lcso22at4',
+        coords = vector4(1853.77, 3674.03, 33.82, 29.65), -- x, y, z, heading
         spin = false,
-        livery = 1,
+        livery = 2,
         extras = {
             [1] = false,
             [2] = true,

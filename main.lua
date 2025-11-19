@@ -1,4 +1,3 @@
--- Ensure the configuration file is loaded (this is usually done via fxmanifest, but good practice)
 if Config == nil then
     print('showcar-standalone: Error! Config not loaded.')
     return
@@ -39,6 +38,9 @@ local function SpawnShowVehicle(car_data, index)
         Wait(100)
     end
 
+    -- DEBUG: Print message before spawning
+    print('showcar-standalone DEBUG: Model loaded, attempting to spawn vehicle ' .. car_data.model)
+
     -- Spawn the vehicle
     local vehicle = CreateVehicle(model, coords.x, coords.y, coords.z, coords.w, false, true)
 
@@ -46,9 +48,6 @@ local function SpawnShowVehicle(car_data, index)
     SetEntityAsMissionEntity(vehicle, true, true)
     SetVehicleUndriveable(vehicle, true)
     FreezeEntityPosition(vehicle, true)
-
-    -- Disable physics for stability
-    SetEntityCollisionDisabled(vehicle, true, true)
 
     -- === LIVERY AND EXTRAS LOGIC (New Feature) ===
     SetVehicleCustomization(vehicle, car_data)
@@ -59,6 +58,13 @@ local function SpawnShowVehicle(car_data, index)
 
     -- Save the handle
     showVehicles[index] = vehicle
+
+    -- DEBUG: Print message after spawning
+    if DoesEntityExist(vehicle) then
+        print('showcar-standalone DEBUG: Vehicle spawned successfully!')
+    else
+        print('showcar-standalone DEBUG: Vehicle spawn FAILED!')
+    end
 
     -- Start the spin loop if required
     if car_data.spin then
@@ -86,6 +92,7 @@ local function InitializeShowCars()
 
     -- Spawn all configured cars
     for index, car_data in pairs(Config.Showrooms) do
+        print('showcar-standalone: Attempting to spawn car at index ' .. index .. ' with model ' .. car_data.model)
         SpawnShowVehicle(car_data, index)
     end
 end
@@ -112,7 +119,7 @@ CreateThread(function()
                 FreezeEntityPosition(vehicle, true)
             end
         end
-        Wait(Config.CheckVehicleTick) -- Wait 5 seconds (default)
+        Wait(Config.CheckVehicleTick)
     end
 end)
 
