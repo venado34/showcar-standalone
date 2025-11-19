@@ -41,6 +41,7 @@ Config.Showrooms = {
         model = 'lcso22at4',
         coords = vector4(1853.77, 3674.03, 33.82, 29.65), -- x, y, z, heading
         spin = false,
+        plate = 'CO34 EOW',
         livery = 2,
         extras = {
             [1] = false,

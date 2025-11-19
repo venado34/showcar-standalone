@@ -37,19 +37,24 @@ local function SpawnShowVehicle(car_data, index)
     while not HasModelLoaded(model) do
         Wait(100)
     end
-
+    
     -- DEBUG: Print message before spawning
     print('showcar-standalone DEBUG: Model loaded, attempting to spawn vehicle ' .. car_data.model)
 
     -- Spawn the vehicle
     local vehicle = CreateVehicle(model, coords.x, coords.y, coords.z, coords.w, false, true)
 
-    -- === ANTI-DELETION & FREEZING LOGIC (New Feature) ===
+    -- === NEW: CUSTOM PLATE LOGIC ===
+    if car_data.plate and type(car_data.plate) == 'string' then
+        SetVehicleNumberPlateText(vehicle, car_data.plate)
+    end
+    
+    -- === ANTI-DELETION & FREEZING LOGIC ===
     SetEntityAsMissionEntity(vehicle, true, true)
     SetVehicleUndriveable(vehicle, true)
     FreezeEntityPosition(vehicle, true)
-
-    -- === LIVERY AND EXTRAS LOGIC (New Feature) ===
+    
+    -- === LIVERY AND EXTRAS LOGIC ===
     SetVehicleCustomization(vehicle, car_data)
 
     -- Mark the model and entity as no longer needed by the script
@@ -58,7 +63,7 @@ local function SpawnShowVehicle(car_data, index)
 
     -- Save the handle
     showVehicles[index] = vehicle
-
+    
     -- DEBUG: Print message after spawning
     if DoesEntityExist(vehicle) then
         print('showcar-standalone DEBUG: Vehicle spawned successfully!')
@@ -119,7 +124,7 @@ CreateThread(function()
                 FreezeEntityPosition(vehicle, true)
             end
         end
-        Wait(Config.CheckVehicleTick)
+        Wait(Config.CheckVehicleTick) 
     end
 end)
 
