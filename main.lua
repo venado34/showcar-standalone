@@ -1,3 +1,4 @@
+-- Ensure the configuration file is loaded
 if Config == nil then
     print('showcar-standalone: Error! Config not loaded.')
     return
@@ -17,7 +18,7 @@ local function SetVehicleCustomization(vehicle, data)
         end
     end
 
-    -- APPLY EXTRAS (INVERTED LOGIC)
+    -- APPLY EXTRAS
     if data.extras and type(data.extras) == 'table' then
         for extra_id, is_active in pairs(data.extras) do
             -- The normal logic (TRUE = 1, FALSE = 0) is commented out
@@ -38,44 +39,58 @@ local function SpawnShowVehicle(car_data, index)
     while not HasModelLoaded(model) do
         Wait(100)
     end
-
+    
     -- DEBUG: Print message before spawning
     print('showcar-standalone DEBUG: Model loaded, attempting to spawn vehicle ' .. car_data.model)
 
     -- Spawn the vehicle
     local vehicle = CreateVehicle(model, coords.x, coords.y, coords.z, coords.w, false, true)
 
-    -- === CUSTOM PLATE LOGIC ===
+    -- VEHICLE MODS LOGIC
+    if car_data.mods and type(car_data.mods) == 'table' then
+        for mod_type, mod_index in pairs(car_data.mods) do
+            if type(mod_type) == 'number' and type(mod_index) == 'number' then
+                SetVehicleMod(vehicle, mod_type, mod_index, false)
+            end
+        end
+    end
+    
+    -- VEHICLE COLORS LOGIC
+    if car_data.colors and type(car_data.colors) == 'table' then
+        local pColor = car_data.colors.primary or 0
+        local sColor = car_data.colors.secondary or 0
+        SetVehicleColours(vehicle, pColor, sColor)
+    end
+
+    -- CUSTOM PLATE LOGIC
     if car_data.plate and type(car_data.plate) == 'string' then
         SetVehicleNumberPlateText(vehicle, car_data.plate)
     end
-
-    -- === VEHICLE CLEANING ===
-    SetVehicleDirtLevel(vehicle, 0.0) -- Ensure the car is spotless (0.0 dirt level)
-
-    -- === ANTI-DELETION & FREEZING LOGIC ===
+    
+    -- VEHICLE CLEANING
+    SetVehicleDirtLevel(vehicle, 0.0)
+    
+    -- ANTI-DELETION & FREEZING LOGIC
     SetEntityAsMissionEntity(vehicle, true, true)
     SetVehicleUndriveable(vehicle, true)
     FreezeEntityPosition(vehicle, true)
-
-    -- === PREVENT PLAYER ENTRY (Boolean Logic) ===
-    local lockState = 0 
+    
+    -- PREVENT PLAYER ENTRY (Boolean Logic)
+    local lockState = 0 -- Default to Unlocked (0)
     if car_data.locked == true then
-        lockState = 7
+        lockState = 7 -- 7 = Fully Locked
     end
-
-    SetVehicleDoorsLocked(vehicle, lockState)
-
-    -- === LIVERY AND EXTRAS LOGIC ===
+    SetVehicleDoorsLocked(vehicle, lockState) 
+    
+    -- LIVERY AND EXTRAS LOGIC
     SetVehicleCustomization(vehicle, car_data)
 
     -- Mark the model as no longer needed by the script
     SetModelAsNoLongerNeeded(model)
-    -- SetEntityNoLongerNeeded(vehicle) <-- Removed crashing line
 
     -- Save the handle
     showVehicles[index] = vehicle
-
+    
     -- DEBUG: Print message after spawning
     if DoesEntityExist(vehicle) then
         print('showcar-standalone DEBUG: Vehicle spawned successfully!')
@@ -138,7 +153,7 @@ CreateThread(function()
                 SetVehicleDirtLevel(vehicle, 0.0)
             end
         end
-        Wait(Config.CheckVehicleTick)
+        Wait(Config.CheckVehicleTick) 
     end
 end)
 

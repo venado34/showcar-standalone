@@ -25,6 +25,15 @@ Config.Showrooms = {
             [1] = false,   -- Extra 1: ON
             [2] = false,  -- Extra 2: OFF
             [5] = false,   -- Extra 5: ON
+        },
+
+        mods = {
+
+        },
+
+        colors = {
+            primary = 0,
+            secondary = 0, 
         }
     },
 
@@ -34,8 +43,7 @@ Config.Showrooms = {
         coords = vector4(100.0, 200.0, 30.0, 0.0),
         spin = false,
         locked = false,
-        plate = 'Dealer',
-        -- You can omit 'livery' and 'extras' if you want defaults.
+        -- You can omit any if you want defaults.
     },
 
     -- Add more show cars here...
@@ -48,6 +56,7 @@ Config.Showrooms = {
         locked = true,
         plate = 'CO34 EOW',
         livery = 1,
+
         extras = {
             [1] = true,
             [2] = false,
@@ -61,6 +70,17 @@ Config.Showrooms = {
             [10] = false,
             [11] = true,
             [12] = false,
-        }
+        },
+
+        mods = {
+            [10] = 1,   -- Aerials
+            [11] = 4,   -- Trim
+            [12] = 5,   -- Tank
+        },
+
+        colors = {
+            primary = 0,
+            secondary = 3, --race yellow
+        },
     },
 }
