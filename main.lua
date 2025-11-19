@@ -1,137 +1,128 @@
-local ped
-Citizen.CreateThread(function()
-	while 1 do
-		ped = PlayerPedId()
-		Wait(5000)
-	end
-end)
+-- Ensure the configuration file is loaded (this is usually done via fxmanifest, but good practice)
+if Config == nil then
+    print('showcar-standalone: Error! Config not loaded.')
+    return
+end
 
-spawned = nil
+-- Table to hold vehicle handles created by the script
+local showVehicles = {}
 
-Citizen.CreateThread(function()
-    while 1 do
-        local pCoords = GetEntityCoords(PlayerPedId())
-        for i=1, #Cars do  
-            if #(pCoords - Cars[i].pos) < ShowRange then                                    
-                if Cars[i].spawned == nil then
-                    SpawnLocalCar(i) 
-                end
-            else
-                DeleteEntity(Cars[i].spawned)
-                Cars[i].spawned = nil                                
-            end
-            Wait(500)
+-- Function to set Livery and Extras
+local function SetVehicleCustomization(vehicle, data)
+    -- APPLY LIVERY
+    if data.livery and data.livery >= 0 then
+        local livery_id = tonumber(data.livery)
+        -- Check if the livery ID is valid for the vehicle model
+        if GetVehicleLiveryCount(vehicle) >= livery_id then
+            SetVehicleLivery(vehicle, livery_id)
         end
     end
-end)
 
+    -- APPLY EXTRAS
+    if data.extras and type(data.extras) == 'table' then
+        for extra_id, is_active in pairs(data.extras) do
+            if DoesVehicleExtraExist(vehicle, extra_id) then
+                -- SetVehicleExtra takes a boolean for activation (0 = off, 1 = on)
+                SetVehicleExtra(vehicle, extra_id, is_active and 1 or 0)
+            end
+        end
+    end
+end
 
-Citizen.CreateThread(function()
-	local ped = ped
+-- Function to spawn a show vehicle
+local function SpawnShowVehicle(car_data, index)
+    local model = GetHashKey(car_data.model)
+    local coords = car_data.coords
+
+    RequestModel(model)
+    while not HasModelLoaded(model) do
+        Wait(100)
+    end
+
+    -- Spawn the vehicle
+    local vehicle = CreateVehicle(model, coords.x, coords.y, coords.z, coords.w, false, true)
+
+    -- === ANTI-DELETION & FREEZING LOGIC (New Feature) ===
+    SetEntityAsMissionEntity(vehicle, true, true)
+    SetVehicleUndriveable(vehicle, true)
+    FreezeEntityPosition(vehicle, true)
+
+    -- Disable physics for stability
+    SetEntityCollisionDisabled(vehicle, true, true)
+
+    -- === LIVERY AND EXTRAS LOGIC (New Feature) ===
+    SetVehicleCustomization(vehicle, car_data)
+
+    -- Mark the model and entity as no longer needed by the script
+    SetModelAsNoLongerNeeded(model)
+    SetEntityNoLongerNeeded(vehicle)
+
+    -- Save the handle
+    showVehicles[index] = vehicle
+
+    -- Start the spin loop if required
+    if car_data.spin then
+        local spinThread = CreateThread(function()
+            while DoesEntityExist(vehicle) do
+                local currentHeading = GetEntityHeading(vehicle)
+                SetEntityHeading(vehicle, currentHeading + 0.5) -- Adjust spin speed here
+                Wait(Config.VehicleSpinRate)
+            end
+        end)
+        -- Store the thread to potentially stop it later if needed (e.g., resource stop)
+        car_data.spinThread = spinThread
+    end
+end
+
+-- Main function to initialize all show cars
+local function InitializeShowCars()
+    -- Clean up any previous cars just in case
+    for _, veh in pairs(showVehicles) do
+        if DoesEntityExist(veh) then
+            DeleteVehicle(veh)
+        end
+    end
+    showVehicles = {}
+
+    -- Spawn all configured cars
+    for index, car_data in pairs(Config.Showrooms) do
+        SpawnShowVehicle(car_data, index)
+    end
+end
+
+-- Thread to ensure vehicles are still present (simple anti-deletion check)
+CreateThread(function()
+    InitializeShowCars() -- Initial spawn
+
+    -- Start the check loop
     while true do
-        Citizen.Wait(0)
-        local pl = GetEntityCoords(ped, true)
-        for k, v in pairs(Cars) do
-            if GetDistanceBetweenCoords(pl.x, pl.y, pl.z, v.pos.x, v.pos.y, v.pos.z, true) < ShowRange then
-                Draw3DText(v.pos.x, v.pos.y, v.pos.z - 0.5, v.text, 0, 0.1, 0.1)                
+        for index, car_data in pairs(Config.Showrooms) do
+            local vehicle = showVehicles[index]
+
+            -- If the vehicle does not exist (was deleted, despawned, etc.)
+            if not DoesEntityExist(vehicle) then
+                print(string.format("showcar-standalone: Vehicle %s at index %d was deleted. Re-spawning.",
+                    car_data.model, index))
+                SpawnShowVehicle(car_data, index)
+            end
+
+            -- Re-apply freeze/mission entity status just to be safe in the tick (optional, but robust)
+            if DoesEntityExist(vehicle) then
+                SetEntityAsMissionEntity(vehicle, true, true)
+                FreezeEntityPosition(vehicle, true)
+            end
+        end
+        Wait(Config.CheckVehicleTick) -- Wait 5 seconds (default)
+    end
+end)
+
+-- Event for resource shutdown (cleanup)
+AddEventHandler('onResourceStop', function(resourceName)
+    if resourceName == GetCurrentResourceName() then
+        for _, veh in pairs(showVehicles) do
+            if DoesEntityExist(veh) then
+                DeleteVehicle(veh)
             end
         end
     end
 end)
-
-Citizen.CreateThread(function() 
-    while 1 do
-        for i=1, #Cars do
-            if Cars[i].spawned ~= nil and Cars[i].spin then
-                SetEntityHeading(Cars[i].spawned, GetEntityHeading(Cars[i].spawned) - 0.3)
-            end
-        end
-        Wait(5)
-    end
-end)
-
-function SpawnLocalCar(i)
-    Citizen.CreateThread(function()
-        local hash = GetHashKey(Cars[i].model)
-        RequestModel(hash)
-        local attempt = 0
-        while not HasModelLoaded(hash) do
-            attempt = attempt + 1
-            if attempt > 2000 then return end
-            Wait(0)
-        end
-        
-        -- Spawn vehicle
-        local veh = CreateVehicle(hash, Cars[i].pos.x, Cars[i].pos.y, Cars[i].pos.z-1, Cars[i].heading, false, false)
-        SetModelAsNoLongerNeeded(hash)
-        
-        -- Set vehicle properties to ensure it's clean
-        SetVehicleEngineOn(veh, false, false, true)
-        SetVehicleBrakeLights(veh, false)
-        SetVehicleLights(veh, 0)
-        SetVehicleLightsMode(veh, 0)
-        SetVehicleInteriorlight(veh, false)
-        SetVehicleOnGroundProperly(veh)
-        FreezeEntityPosition(veh, true)
-        SetVehicleCanBreak(veh, true)
-        SetVehicleFullbeam(veh, false)
-        
-        -- Ensure the vehicle is clean and undamaged
-        SetVehicleDamage(veh, 0, 0, 0) -- Reset damage
-        SetVehicleDirtLevel(veh, 0.0)  -- Remove dirt
-
-        -- Set random colors
-        local primaryColor = math.random(0, 159) -- Random color ID for primary color
-        local secondaryColor = math.random(0, 159) -- Random color ID for secondary color
-        SetVehicleColours(veh, primaryColor, secondaryColor)
-
-        -- Additional settings
-        if carInvincible then
-            SetVehicleReceivesRampDamage(veh, true)
-            RemoveDecalsFromVehicle(veh)
-            SetVehicleCanBeVisiblyDamaged(veh, true)
-            SetVehicleLightsCanBeVisiblyDamaged(veh, true)
-            SetVehicleWheelsCanBreakOffWhenBlowUp(veh, false)  
-            SetDisableVehicleWindowCollisions(veh, true)    
-            SetEntityInvincible(veh, true)
-        end
-        if DoorLock then 
-            SetVehicleDoorsLocked(veh, 2)
-        end
-        SetVehicleNumberPlateText(veh, Cars[i].plate)
-        Cars[i].spawned = veh
-    end)
-end
-
-
-
-AddEventHandler('onResourceStop', function(res)
-    if res == GetCurrentResourceName() then
-        for i=1, #Cars do
-            if Cars[i].spawned ~= nil then
-                DeleteEntity(Cars[i].spawned)
-            end
-        end
-    end
-end)
-
-function Draw3DText(x, y, z, textInput, fontId, scaleX, scaleY)
-	local px, py, pz = table.unpack(GetGameplayCamCoords())
-	local dist = GetDistanceBetweenCoords(px, py, pz, x, y, z, 1)    
-	local scale      = (1 / dist) * 20
-	local fov        = (1 / GetGameplayCamFov()) * 100
-	local scale      = scale * fov   
-	SetTextScale(scaleX * scale, scaleY * scale)
-	SetTextFont(fontId)
-	SetTextProportional(1)
-	SetTextColour(250, 250, 250, 255)
-	SetTextDropshadow(1, 1, 1, 1, 255)
-	SetTextEdge(2, 0, 0, 0, 150)
-	SetTextOutline()
-	SetTextEntry("STRING")
-	SetTextCentre(1)
-	AddTextComponentString(textInput)
-	SetDrawOrigin(x, y, z + 2, 0)
-	DrawText(0.0, 0.0)
-	ClearDrawOrigin()
-end
