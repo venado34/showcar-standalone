@@ -11,30 +11,35 @@ Config.Showrooms = {
     --[[
     -- Example 1: Zentorno (Spins, Livery 1, Extras 1 and 5 ON)
     [1] = {
-        model = 'zentorno',
-        coords = vector4(-123.45, 678.90, 31.0, 180.0), -- x, y, z, heading
-        locked = false,
+        model = 'lcso22at4',
+        coords = vector4(1853.77, 3674.03, 33.82, 29.65), -- x, y, z, heading
         spin = false,
-        plate = 'Dealer',
-
-        -- Vehicle Livery (Integer index: 0 is default)
+        locked = true,
+        plate = 'CO34 EOW',
         livery = 1,
+        callsign = 34,
+        callsign_color = 3,
+        modkit_id = 634,
 
-        -- Vehicle Extras (Key=Extra ID 1-12, Value = false/false)
         extras = {
-            [1] = true,   -- Extra 1: ON
-            [2] = false,  -- Extra 2: OFF
-            [5] = true,   -- Extra 5: ON
-        },
-
-        mods = {
-
+            [1] = false,
+            [2] = true,
+            [3] = true,
+            [4] = true,
+            [5] = true,
+            [6] = true,
+            [7] = true,
+            [8] = true,
+            [9] = true,
+            [10] = true,
+            [11] = false,
+            [12] = true,
         },
 
         colors = {
             primary = 0,
-            secondary = 0, 
-        }
+            secondary = 3, --race yellow
+        },
     },
 
     -- Example 2: Adder (No spin, Default Livery, All Extras OFF)
@@ -56,15 +61,8 @@ Config.Showrooms = {
         locked = true,
         plate = 'CO34 EOW',
         livery = 1,
-        callsign = 34,      -- Use '34' (will display as 034)
-        callsign_color = 3,
-        modkit_id = 634,
-
-        mods = {
-            [10] = 1,   -- Aerials
-            [11] = 4,   -- Trim
-            [12] = 5,   -- Tank
-        },
+        callsign = 34,
+        callsign_color = 89,
 
         extras = {
             [1] = false,

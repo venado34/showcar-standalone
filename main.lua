@@ -46,7 +46,7 @@ local function SpawnShowVehicle(car_data, index)
     -- Get Net ID for external scripts (like ebu_vroofnum)
     local vehicleNetId = VehToNet(vehicle) 
 
-    -- APPLY MODKIT FLEXIBLY
+    --  FIX: APPLY MODKIT FLEXIBLY 
     local modKitToUse = 0 -- Default for most stock cars
     
     -- If a specific modkit ID is defined in the config, use it.
@@ -100,7 +100,7 @@ local function SpawnShowVehicle(car_data, index)
     -- LIVERY AND EXTRAS LOGIC
     SetVehicleCustomization(vehicle, car_data)
 
-    -- true EBU ROOF NUMBERS/CALLSIGN LOGIC true
+    --  NEW: EBU ROOF NUMBERS/CALLSIGN LOGIC 
     if exports['ebu_vroofnum'] then
         -- Set the number (e.g., 34 -> 034)
         if car_data.callsign and type(car_data.callsign) == 'number' then
