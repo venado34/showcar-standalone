@@ -18,13 +18,10 @@ local function SetVehicleCustomization(vehicle, data)
         end
     end
 
-    -- APPLY EXTRAS
+    -- APPLY EXTRAS (USING INVERTED LOGIC: TRUE=0, FALSE=1 for the specific custom model)
     if data.extras and type(data.extras) == 'table' then
         for extra_id, is_active in pairs(data.extras) do
-            -- The normal logic (TRUE = 1, FALSE = 0) is commented out
-            -- SetVehicleExtra(vehicle, extra_id, is_active and 1 or 0)
-
-            -- Use the INVERTED logic (TRUE = 0, FALSE = 1)
+            -- If is_active is TRUE (in config), pass 0 (OFF). If FALSE, pass 1 (ON).
             SetVehicleExtra(vehicle, extra_id, is_active and 0 or 1)
         end
     end
@@ -45,8 +42,29 @@ local function SpawnShowVehicle(car_data, index)
 
     -- Spawn the vehicle
     local vehicle = CreateVehicle(model, coords.x, coords.y, coords.z, coords.w, false, true)
+    
+    -- Get Net ID for external scripts (like ebu_vroofnum)
+    local vehicleNetId = VehToNet(vehicle) 
 
-    -- VEHICLE MODS LOGIC
+    -- APPLY MODKIT FLEXIBLY
+    local modKitToUse = 0 -- Default for most stock cars
+    
+    -- If a specific modkit ID is defined in the config, use it.
+    if car_data.modkit_id and type(car_data.modkit_id) == 'number' then
+        modKitToUse = car_data.modkit_id
+    end
+    
+    SetVehicleModKit(vehicle, modKitToUse) 
+    Wait(10) -- Allow time for modkit to register
+
+    -- VEHICLE COLORS LOGIC (Run immediately after modkit)
+    if car_data.colors and type(car_data.colors) == 'table' then
+        local pColor = car_data.colors.primary or 0
+        local sColor = car_data.colors.secondary or 0
+        SetVehicleColours(vehicle, pColor, sColor)
+    end
+    
+    -- VEHICLE MODS LOGIC (Run after colors)
     if car_data.mods and type(car_data.mods) == 'table' then
         for mod_type, mod_index in pairs(car_data.mods) do
             if type(mod_type) == 'number' and type(mod_index) == 'number' then
@@ -55,13 +73,6 @@ local function SpawnShowVehicle(car_data, index)
         end
     end
     
-    -- VEHICLE COLORS LOGIC
-    if car_data.colors and type(car_data.colors) == 'table' then
-        local pColor = car_data.colors.primary or 0
-        local sColor = car_data.colors.secondary or 0
-        SetVehicleColours(vehicle, pColor, sColor)
-    end
-
     -- CUSTOM PLATE LOGIC
     if car_data.plate and type(car_data.plate) == 'string' then
         SetVehicleNumberPlateText(vehicle, car_data.plate)
@@ -75,6 +86,10 @@ local function SpawnShowVehicle(car_data, index)
     SetVehicleUndriveable(vehicle, true)
     FreezeEntityPosition(vehicle, true)
     
+    -- FIX: RESET NEON/DASH COLORS (General cleanup for non-customizable colors)
+    SetVehicleNeonLightsColour(vehicle, 0, 0, 0)
+    SetVehicleDashboardColour(vehicle, 0)
+
     -- PREVENT PLAYER ENTRY (Boolean Logic)
     local lockState = 0 -- Default to Unlocked (0)
     if car_data.locked == true then
@@ -84,6 +99,19 @@ local function SpawnShowVehicle(car_data, index)
     
     -- LIVERY AND EXTRAS LOGIC
     SetVehicleCustomization(vehicle, car_data)
+
+    -- true EBU ROOF NUMBERS/CALLSIGN LOGIC true
+    if exports['ebu_vroofnum'] then
+        -- Set the number (e.g., 34 -> 034)
+        if car_data.callsign and type(car_data.callsign) == 'number' then
+            exports['ebu_vroofnum']:SetVehNum(car_data.callsign, vehicleNetId)
+        end
+
+        -- Set the color (e.g., yellow)
+        if car_data.callsign_color then
+            exports['ebu_vroofnum']:SetVehicleColor(car_data.callsign_color, vehicleNetId)
+        end
+    end
 
     -- Mark the model as no longer needed by the script
     SetModelAsNoLongerNeeded(model)

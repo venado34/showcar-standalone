@@ -22,9 +22,9 @@ Config.Showrooms = {
 
         -- Vehicle Extras (Key=Extra ID 1-12, Value = false/false)
         extras = {
-            [1] = false,   -- Extra 1: ON
+            [1] = true,   -- Extra 1: ON
             [2] = false,  -- Extra 2: OFF
-            [5] = false,   -- Extra 5: ON
+            [5] = true,   -- Extra 5: ON
         },
 
         mods = {
@@ -56,26 +56,29 @@ Config.Showrooms = {
         locked = true,
         plate = 'CO34 EOW',
         livery = 1,
-
-        extras = {
-            [1] = true,
-            [2] = false,
-            [3] = false,
-            [4] = false,
-            [5] = false,
-            [6] = false,
-            [7] = false,
-            [8] = false,
-            [9] = false,
-            [10] = false,
-            [11] = true,
-            [12] = false,
-        },
+        callsign = 34,      -- Use '34' (will display as 034)
+        callsign_color = 3,
+        modkit_id = 634,
 
         mods = {
             [10] = 1,   -- Aerials
             [11] = 4,   -- Trim
             [12] = 5,   -- Tank
+        },
+
+        extras = {
+            [1] = false,
+            [2] = true,
+            [3] = true,
+            [4] = true,
+            [5] = true,
+            [6] = true,
+            [7] = true,
+            [8] = true,
+            [9] = true,
+            [10] = true,
+            [11] = false,
+            [12] = true,
         },
 
         colors = {
