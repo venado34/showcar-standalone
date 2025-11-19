@@ -36,25 +36,22 @@ local function SpawnShowVehicle(car_data, index)
     while not HasModelLoaded(model) do
         Wait(100)
     end
-    
+
     -- DEBUG: Print message before spawning
     print('showcar-standalone DEBUG: Model loaded, attempting to spawn vehicle ' .. car_data.model)
 
     -- Spawn the vehicle
     local vehicle = CreateVehicle(model, coords.x, coords.y, coords.z, coords.w, false, true)
-    
-    -- Get Net ID for external scripts (like ebu_vroofnum)
-    local vehicleNetId = VehToNet(vehicle) 
 
-    --  FIX: APPLY MODKIT FLEXIBLY 
+    -- FIX: APPLY MODKIT FLEXIBLY
     local modKitToUse = 0 -- Default for most stock cars
-    
+
     -- If a specific modkit ID is defined in the config, use it.
     if car_data.modkit_id and type(car_data.modkit_id) == 'number' then
         modKitToUse = car_data.modkit_id
     end
-    
-    SetVehicleModKit(vehicle, modKitToUse) 
+
+    SetVehicleModKit(vehicle, modKitToUse)
     Wait(10) -- Allow time for modkit to register
 
     -- VEHICLE COLORS LOGIC (Run immediately after modkit)
@@ -63,7 +60,7 @@ local function SpawnShowVehicle(car_data, index)
         local sColor = car_data.colors.secondary or 0
         SetVehicleColours(vehicle, pColor, sColor)
     end
-    
+
     -- VEHICLE MODS LOGIC (Run after colors)
     if car_data.mods and type(car_data.mods) == 'table' then
         for mod_type, mod_index in pairs(car_data.mods) do
@@ -72,20 +69,20 @@ local function SpawnShowVehicle(car_data, index)
             end
         end
     end
-    
+
     -- CUSTOM PLATE LOGIC
     if car_data.plate and type(car_data.plate) == 'string' then
         SetVehicleNumberPlateText(vehicle, car_data.plate)
     end
-    
+
     -- VEHICLE CLEANING
     SetVehicleDirtLevel(vehicle, 0.0)
-    
+
     -- ANTI-DELETION & FREEZING LOGIC
     SetEntityAsMissionEntity(vehicle, true, true)
     SetVehicleUndriveable(vehicle, true)
     FreezeEntityPosition(vehicle, true)
-    
+
     -- FIX: RESET NEON/DASH COLORS (General cleanup for non-customizable colors)
     SetVehicleNeonLightsColour(vehicle, 0, 0, 0)
     SetVehicleDashboardColour(vehicle, 0)
@@ -93,23 +90,38 @@ local function SpawnShowVehicle(car_data, index)
     -- PREVENT PLAYER ENTRY (Boolean Logic)
     local lockState = 0 -- Default to Unlocked (0)
     if car_data.locked == true then
-        lockState = 7 -- 7 = Fully Locked
+        lockState = 7   -- 7 = Fully Locked
     end
-    SetVehicleDoorsLocked(vehicle, lockState) 
-    
+    SetVehicleDoorsLocked(vehicle, lockState)
+
     -- LIVERY AND EXTRAS LOGIC
     SetVehicleCustomization(vehicle, car_data)
 
-    --  NEW: EBU ROOF NUMBERS/CALLSIGN LOGIC 
+    -- FINAL FIX: EBU ROOF NUMBERS/CALLSIGN LOGIC
     if exports['ebu_vroofnum'] then
-        -- Set the number (e.g., 34 -> 034)
-        if car_data.callsign and type(car_data.callsign) == 'number' then
-            exports['ebu_vroofnum']:SetVehNum(car_data.callsign, vehicleNetId)
+        -- Wait until the entity has a Net ID assigned (fixes "no net object" error)
+        local attempts = 0
+        local vehicleNetId = VehToNet(vehicle)
+        while vehicleNetId == 0 and attempts < 10 do
+            Wait(100)
+            vehicleNetId = VehToNet(vehicle)
+            attempts = attempts + 1
         end
 
-        -- Set the color (e.g., yellow)
-        if car_data.callsign_color then
-            exports['ebu_vroofnum']:SetVehicleColor(car_data.callsign_color, vehicleNetId)
+        if vehicleNetId ~= 0 then
+            -- Set the number (e.g., 34 -> 034)
+            if car_data.callsign and type(car_data.callsign) == 'number' then
+                exports['ebu_vroofnum']:SetVehNum(car_data.callsign, vehicleNetId)
+            end
+
+            -- Set the color (Fixes "attempt to index a number" error by passing a table)
+            if car_data.callsign_color then
+                -- Wrap the single color ID in a table as the export requires: {ColorID}
+                local colorTable = { car_data.callsign_color }
+                exports['ebu_vroofnum']:SetVehicleColor(colorTable, vehicleNetId)
+            end
+        else
+            print('showcar-standalone: Warning! Could not get NetID for ' .. car_data.model)
         end
     end
 
@@ -118,7 +130,7 @@ local function SpawnShowVehicle(car_data, index)
 
     -- Save the handle
     showVehicles[index] = vehicle
-    
+
     -- DEBUG: Print message after spawning
     if DoesEntityExist(vehicle) then
         print('showcar-standalone DEBUG: Vehicle spawned successfully!')
@@ -181,7 +193,7 @@ CreateThread(function()
                 SetVehicleDirtLevel(vehicle, 0.0)
             end
         end
-        Wait(Config.CheckVehicleTick) 
+        Wait(Config.CheckVehicleTick)
     end
 end)
 
