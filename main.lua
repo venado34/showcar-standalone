@@ -20,10 +20,8 @@ local function SetVehicleCustomization(vehicle, data)
     -- APPLY EXTRAS
     if data.extras and type(data.extras) == 'table' then
         for extra_id, is_active in pairs(data.extras) do
-            if DoesVehicleExtraExist(vehicle, extra_id) then
-                -- SetVehicleExtra takes a boolean for activation (0 = off, 1 = on)
-                SetVehicleExtra(vehicle, extra_id, is_active and 1 or 0)
-            end
+            SetVehicleExtra(vehicle, extra_id, is_active and 1 or 0)
+            -- SetVehicleExtra(vehicle, extra_id, is_active and 0 or 1)  --uncomment this and comment out above if reversed
         end
     end
 end
@@ -49,6 +47,9 @@ local function SpawnShowVehicle(car_data, index)
         SetVehicleNumberPlateText(vehicle, car_data.plate)
     end
     
+    -- === VEHICLE CLEANING ===
+    SetVehicleDirtLevel(vehicle, 0.0) -- Ensure the car is spotless (0.0 dirt level)
+    
     -- === ANTI-DELETION & FREEZING LOGIC ===
     SetEntityAsMissionEntity(vehicle, true, true)
     SetVehicleUndriveable(vehicle, true)
@@ -59,7 +60,7 @@ local function SpawnShowVehicle(car_data, index)
 
     -- Mark the model and entity as no longer needed by the script
     SetModelAsNoLongerNeeded(model)
-    SetEntityNoLongerNeeded(vehicle)
+    -- SetEntityNoLongerNeeded(vehicle) <-- Removed crashing line
 
     -- Save the handle
     showVehicles[index] = vehicle
@@ -122,6 +123,8 @@ CreateThread(function()
             if DoesEntityExist(vehicle) then
                 SetEntityAsMissionEntity(vehicle, true, true)
                 FreezeEntityPosition(vehicle, true)
+                -- Also ensure it stays clean if the vehicle is checked in the loop
+                SetVehicleDirtLevel(vehicle, 0.0) 
             end
         end
         Wait(Config.CheckVehicleTick) 

@@ -13,17 +13,17 @@ Config.Showrooms = {
     [1] = {
         model = 'zentorno',
         coords = vector4(-123.45, 678.90, 31.0, 180.0), -- x, y, z, heading
-        spin = true,
+        spin = false,
         plate = 'Dealer',
 
         -- Vehicle Livery (Integer index: 0 is default)
         livery = 1,
 
-        -- Vehicle Extras (Key=Extra ID 1-12, Value = true/false)
+        -- Vehicle Extras (Key=Extra ID 1-12, Value = false/false)
         extras = {
-            [1] = true,   -- Extra 1: ON
+            [1] = false,   -- Extra 1: ON
             [2] = false,  -- Extra 2: OFF
-            [5] = true,   -- Extra 5: ON
+            [5] = false,   -- Extra 5: ON
         }
     },
 
@@ -43,20 +43,20 @@ Config.Showrooms = {
         coords = vector4(1853.77, 3674.03, 33.82, 29.65), -- x, y, z, heading
         spin = false,
         plate = 'CO34 EOW',
-        livery = 2,
+        livery = 1,
         extras = {
-            [1] = false,
-            [2] = true,
-            [3] = true,
-            [4] = true,
-            [5] = true,
-            [6] = true,
-            [7] = true,
-            [8] = true,
-            [9] = true,
-            [10] = true,
-            [11] = false,
-            [12] = true,
+            [1] = true,
+            [2] = false,
+            [3] = false,
+            [4] = false,
+            [5] = false,
+            [6] = false,
+            [7] = false,
+            [8] = false,
+            [9] = false,
+            [10] = false,
+            [11] = true,
+            [12] = false,
         }
     },
 }
