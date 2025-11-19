@@ -13,6 +13,7 @@ Config.Showrooms = {
     [1] = {
         model = 'zentorno',
         coords = vector4(-123.45, 678.90, 31.0, 180.0), -- x, y, z, heading
+        locked = false,
         spin = false,
         plate = 'Dealer',
 
@@ -32,6 +33,8 @@ Config.Showrooms = {
         model = 'adder',
         coords = vector4(100.0, 200.0, 30.0, 0.0),
         spin = false,
+        locked = false,
+        plate = 'Dealer',
         -- You can omit 'livery' and 'extras' if you want defaults.
     },
 
@@ -42,6 +45,7 @@ Config.Showrooms = {
         model = 'lcso22at4',
         coords = vector4(1853.77, 3674.03, 33.82, 29.65), -- x, y, z, heading
         spin = false,
+        locked = true,
         plate = 'CO34 EOW',
         livery = 1,
         extras = {

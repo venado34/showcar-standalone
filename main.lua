@@ -58,10 +58,18 @@ local function SpawnShowVehicle(car_data, index)
     SetVehicleUndriveable(vehicle, true)
     FreezeEntityPosition(vehicle, true)
 
+    -- === PREVENT PLAYER ENTRY (Boolean Logic) ===
+    local lockState = 0 
+    if car_data.locked == true then
+        lockState = 7
+    end
+
+    SetVehicleDoorsLocked(vehicle, lockState)
+
     -- === LIVERY AND EXTRAS LOGIC ===
     SetVehicleCustomization(vehicle, car_data)
 
-    -- Mark the model and entity as no longer needed by the script
+    -- Mark the model as no longer needed by the script
     SetModelAsNoLongerNeeded(model)
     -- SetEntityNoLongerNeeded(vehicle) <-- Removed crashing line
 
